@@ -5,6 +5,9 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // You can obtain one at http://mozilla.org/MPL/2.0/.
+//------------------------------------------------------------------------------
+// 2020.02.22 @Wald.Urbas ColumnTypeLength for strings (x.length >> 2)
+//------------------------------------------------------------------------------
 
 package mysql
 
@@ -63,9 +66,19 @@ func (rows *mysqlRows) ColumnTypeDatabaseTypeName(i int) string {
 	return rows.rs.columns[i].typeDatabaseName()
 }
 
-// func (rows *mysqlRows) ColumnTypeLength(i int) (length int64, ok bool) {
-// 	return int64(rows.rs.columns[i].length), true
-// }
+// ColumnTypeLength #
+//------------------------------------------------------------------------------
+// 2020.02.22 @Wald.Urbas for strings (x.length >> 2)
+//------------------------------------------------------------------------------
+func (rows *mysqlRows) ColumnTypeLength(i int) (length int64, ok bool) {
+   c := rows.rs.columns[i]
+   switch c.fieldType {
+   case fieldTypeVarString, fieldTypeString, fieldTypeVarChar:
+      return int64(c.length >> 2), true
+   }
+
+   return 0, false
+}
 
 func (rows *mysqlRows) ColumnTypeNullable(i int) (nullable, ok bool) {
 	return rows.rs.columns[i].flags&flagNotNULL == 0, true
